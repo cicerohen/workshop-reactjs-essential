@@ -1,8 +1,10 @@
 {
-  "name": "workshop-reactjs-essential-2",
+  "name": "workshop-reactjs-essential",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@headlessui/react": "^1.6.5",
+    "@heroicons/react": "^1.0.6",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^13.5.0",
@@ -10,17 +12,26 @@
     "@types/node": "^16.11.41",
     "@types/react": "^18.0.14",
     "@types/react-dom": "^18.0.5",
+    "clsx": "^1.1.1",
+    "formik": "^2.2.9",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "6",
     "react-scripts": "5.0.1",
     "typescript": "^4.7.4",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "yup": "^0.32.11"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "lint": "eslint .",
+    "lint:fix": "yarn lint --fix",
+    "prettier": "prettier . --check",
+    "prettier:fix": "yarn prettier --write",
+    "format": "yarn lint:fix && yarn prettier:fix"
   },
   "eslintConfig": {
     "extends": [
@@ -39,5 +50,11 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "eslint": "^8.18.0",
+    "postcss": "^8.4.14",
+    "prettier": "^2.7.1",
+    "tailwindcss": "^3.1.4"
   }
 }
