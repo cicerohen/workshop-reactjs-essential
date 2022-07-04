@@ -7,15 +7,17 @@ import PlusIcon from '@heroicons/react/outline/PlusIcon';
 
 import { RCProps } from '../types';
 
-type Props = RCProps<{
-  onAddPet: any;
-  onSelectAllPets: any;
-  onUnselectAllPets: any;
-  onRemoveSelectedPets: any;
-  areAllPetsSelected: boolean;
-  areThereAnySelectedPets: boolean;
-  areThereAnyPets: boolean;
-}>;
+type Props = RCProps<
+  Partial<{
+    onAddPet: any;
+    onSelectAllPets: any;
+    onUnselectAllPets: any;
+    onRemoveSelectedPets: any;
+    areAllPetsSelected: boolean;
+    areThereAnySelectedPets: boolean;
+    areThereAnyPets: boolean;
+  }>
+>;
 
 export const PetsListActionsMenu = ({
   onAddPet,

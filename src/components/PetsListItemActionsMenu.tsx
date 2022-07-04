@@ -5,11 +5,13 @@ import TrashIcon from '@heroicons/react/outline/TrashIcon';
 import PencilAltIcon from '@heroicons/react/outline/PencilAltIcon';
 import { RCProps, Pet } from '../types';
 
-type Props = RCProps<{
-  pet: Pet;
-  onEditPet: (pet: Pet) => void;
-  onRemovePet: (pet: Pet) => void;
-}>;
+type Props = RCProps<
+  Partial<{
+    pet: Pet;
+    onEditPet: (pet: Pet) => void;
+    onRemovePet: (pet: Pet) => void;
+  }>
+>;
 
 export const PetsListItemActionsMenu = ({
   pet,
@@ -17,18 +19,18 @@ export const PetsListItemActionsMenu = ({
   onRemovePet
 }: Props) => {
   const onEditPetHandler = () => {
-    if (onEditPet) {
+    if (pet && onEditPet) {
       onEditPet(pet);
     }
   };
 
   const onRemovePetHandler = () => {
-    if (onRemovePet) {
+    if (pet && onRemovePet) {
       onRemovePet(pet);
     }
   };
   return (
-    <Menu as="menu" className="relative space-x-1 flex ml-auto">
+    <Menu as="menu" className="relative space-x-1">
       <Menu.Button className="px-3 py-2">
         <DotsVerticalIcon className="h-5 w-5 text-gray-400" />
       </Menu.Button>

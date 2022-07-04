@@ -22,6 +22,11 @@ export const Sidebar = ({ isOpen = true, onClose }: Props) => {
       </div>
       <nav className="list-none px-8 space-y-4">
         <li>
+          <Link to="/favorites" className="text-lg text-gray-300">
+            Favorite Pets
+          </Link>
+        </li>
+        <li>
           <Link to="/cats" className="text-lg text-gray-300">
             Add cats
           </Link>

@@ -1,29 +1,31 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { View } from '../../components/View';
 import { PetsList } from '../../components/PetsList';
 import { PetEditModal } from '../../components/PetEditModal';
 
 import { usePets } from '../../hooks/usePets';
+import { useSelectedPets } from '../../hooks/useSelectedPets';
 import { usePetEditForm } from '../../components/PetEditForm';
+
+import { useFavoriteDogsContext } from '../..//contexts/FavoriteDogsContext';
 
 import { Pet } from '../../types';
 
 export const DogsViewContainer = () => {
+  const { pets, addPet, updatePet, removePet, removePets } = usePets('dog');
+
   const {
-    pets,
-    selectedPets,
-    addPet,
-    updatePet,
-    removePet,
-    removeSelectedPets,
-    selectPet,
-    selectAllPets,
-    unselectPet,
-    unselectAllPets,
+    selectedPetIds,
     areAllPetsSelected,
     areThereAnySelectedPets,
-    areThereAnyPets
-  } = usePets('dog');
+    areThereAnyPets,
+    selectPet,
+    unselectPet,
+    selectAllPets,
+    unselectAllPets
+  } = useSelectedPets(pets, 'dog');
+
+  const { favoriteDogs, favoriteDog, unFavoriteDog } = useFavoriteDogsContext();
 
   const [modal, setModal] = useState<PetEditModal>({
     loading: false,
@@ -76,27 +78,36 @@ export const DogsViewContainer = () => {
 
   const onRemovePet = (pet: Pet) => {
     removePet(pet.id);
+    unFavoriteDog(pet);
   };
 
   const onRemoveSelectedPets = () => {
-    removeSelectedPets();
+    removePets(Object.keys(selectedPetIds));
   };
 
   const onSelectPet = (pet: Pet) => {
     selectPet(pet.id);
   };
 
-  const onUnselectPet = (pet: Pet) => {
-    console.log('dsds');
-    unselectPet(pet.id);
-  };
-
   const onSelectAllPets = () => {
     selectAllPets();
   };
 
+  const onUnselectPet = (pet: Pet) => {
+    unselectPet(pet.id);
+  };
+
   const onUnselectAllPets = () => {
     unselectAllPets();
+  };
+
+  const onFavoritePet = (pet: Pet) => {
+    console.log('favorite', pet);
+    favoriteDog(pet);
+  };
+  const onUnFavoritePet = (pet: Pet) => {
+    console.log('unfavorite', pet);
+    unFavoriteDog(pet);
   };
 
   const onClosePetEditModal = () => {
@@ -111,7 +122,11 @@ export const DogsViewContainer = () => {
     <View title="Add Dogs">
       <PetsList
         pets={pets}
-        selectedPets={selectedPets}
+        favoritePets={favoriteDogs}
+        selectedPetIds={selectedPetIds}
+        showSelector
+        showBookmarker
+        showActionsMenu
         areAllPetsSelected={areAllPetsSelected}
         areThereAnySelectedPets={areThereAnySelectedPets}
         areThereAnyPets={areThereAnyPets}
@@ -123,6 +138,8 @@ export const DogsViewContainer = () => {
         onSelectAllPets={onSelectAllPets}
         onUnselectPet={onUnselectPet}
         onUnselectAllPets={onUnselectAllPets}
+        onFavoritePet={onFavoritePet}
+        onUnfavoritePet={onUnFavoritePet}
       />
       <PetEditModal
         open={modal.open}
