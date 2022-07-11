@@ -1,61 +1,79 @@
 import { useEffect, useState } from 'react';
 
-import { Pet, Species } from '../types';
+import { Pet, Species, PetsMap } from '../types';
 
-type FavoritePetIds = Record<Pet['id'], Pet['id']>;
-
-const getFavoritePetsFromLocalStorage = (species: Species): Pet[] => {
+export const getFavoritePetsFromLocalStorage = (species: Species): PetsMap => {
   try {
-    return (
-      JSON.parse(
-        window.localStorage.getItem(`favorite-${species}`) as string
-      ) || []
+    return new Map(
+      JSON.parse(window.localStorage.getItem(`favorite-${species}`) || '[]')
     );
   } catch (e) {
-    return [];
+    return new Map();
   }
 };
 
-const setFavoritePetsToLocalStorage = (pets: Pet[], species: Species) => {
-  window.localStorage.setItem(`favorite-${species}`, JSON.stringify(pets));
+export const setFavoritePetsToLocalStorage = (
+  species: Species,
+  favoritePets: PetsMap
+) => {
+  window.localStorage.setItem(
+    `favorite-${species}`,
+    JSON.stringify(Array.from(favoritePets.entries()))
+  );
 };
 
-export const useFavoritePets = (species: Species) => {
-  const [favoritePets, setFavoritePets] = useState<Pet[]>(
+export const useFavoritePets = (pets: PetsMap, species: Species) => {
+  const [favoritePets, setFavoritePets] = useState<PetsMap>(
     getFavoritePetsFromLocalStorage(species)
   );
 
-  const [favoritePetIds, setFavoritePetIds] = useState<FavoritePetIds>();
-
-  const favoritePet = (pet: Pet) => {
-    setFavoritePets((prev) => [...prev, pet]);
+  const favoritePet = (id: Pet['id']) => {
+    setFavoritePets((prev) => {
+      if (pets.has(id)) {
+        const next = new Map(prev);
+        next.set(id, pets.get(id));
+        return next;
+      }
+      return prev;
+    });
   };
 
-  const unFavoritePet = (pet: Pet) => {
-    setFavoritePets((prev) => prev.filter((item) => item.id !== pet.id));
+  const unFavoritePet = (id: Pet['id']) => {
+    setFavoritePets((prev) => {
+      const next = new Map(prev);
+      next.delete(id);
+      return next;
+    });
   };
 
-  const unFavoritePets = (pets: Pet[]) => {
-    const ids = pets.map((pet) => pet.id);
-    setFavoritePets((prev) => prev.filter((item) => ids.includes(item.id)));
+  const unFavoritePets = (ids: Pet['id'][]) => {
+    setFavoritePets((prev) => {
+      const next = new Map(prev);
+      ids.forEach((id) => {
+        next.delete(id);
+      });
+      return next;
+    });
   };
 
   useEffect(() => {
-    setFavoritePetsToLocalStorage(favoritePets, species);
+    setFavoritePetsToLocalStorage(species, favoritePets);
   }, [favoritePets]);
 
   useEffect(() => {
-    setFavoritePetIds(
-      favoritePets.reduce((acc, curr) => {
-        acc[curr.id] = curr.id;
-        return acc;
-      }, {} as FavoritePetIds)
-    );
-  }, [favoritePets]);
+    setFavoritePets((prev) => {
+      const next = new Map(prev);
+      next.forEach((p) => {
+        if (p && !pets.has(p.id)) {
+          next.delete(p.id);
+        }
+      });
+      return next;
+    });
+  }, [pets]);
 
   return {
     favoritePets,
-    favoritePetIds,
     favoritePet,
     unFavoritePet,
     unFavoritePets

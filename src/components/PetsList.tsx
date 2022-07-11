@@ -1,18 +1,16 @@
 import { PetsListItem } from './PetsListItem';
 import { PetsListActionsMenu } from './PetsListActionsMenu';
 
-import { Pet, RCProps } from '../types';
-
-type SelectedPets = Record<Pet['id'], Pet['id']>;
+import { Pet, RCProps, PetsMap } from '../types';
 
 type Props = RCProps<
   Partial<{
-    pets: Pet[];
-    favoritePets: Pet[];
+    pets: PetsMap;
+    favoritePets: PetsMap;
+    selectedPets: PetsMap;
     showSelector: boolean;
     showBookmarker: boolean;
     showActionsMenu: boolean;
-    selectedPetIds: SelectedPets;
     areAllPetsSelected: boolean;
     areThereAnySelectedPets: boolean;
     areThereAnyPets: boolean;
@@ -32,7 +30,7 @@ type Props = RCProps<
 export const PetsList = ({
   pets,
   favoritePets,
-  selectedPetIds,
+  selectedPets,
   showSelector,
   showBookmarker,
   showActionsMenu,
@@ -50,10 +48,6 @@ export const PetsList = ({
   onFavoritePet,
   onUnfavoritePet
 }: Props) => {
-  const favoritePetIds = favoritePets?.reduce((acc, curr) => {
-    acc[curr.id] = curr.id;
-    return acc;
-  }, {} as Record<Pet['id'], Pet['id']>);
   return (
     <section className="space-y-4">
       {showActionsMenu && (
@@ -68,25 +62,30 @@ export const PetsList = ({
         />
       )}
       <ul className="divide-y">
-        {pets?.map((pet) => {
-          return (
-            <PetsListItem
-              {...pet}
-              key={pet.id}
-              selected={!!selectedPetIds?.[pet.id]}
-              favorite={!!favoritePetIds?.[pet.id]}
-              showSelector={showSelector}
-              showActionsMenu={showActionsMenu}
-              showBookmarker={showBookmarker}
-              onEditPet={onEditPet}
-              onRemovePet={onRemovePet}
-              onSelectPet={onSelectPet}
-              onUnselectPet={onUnselectPet}
-              onFavoritePet={onFavoritePet}
-              onUnfavoritePet={onUnfavoritePet}
-            />
-          );
-        })}
+        {pets &&
+          Array.from(pets.values()).map((pet) => {
+            if (pet) {
+              return (
+                <PetsListItem
+                  {...pet}
+                  key={pet.id}
+                  selected={selectedPets?.has(pet.id)}
+                  favorite={favoritePets?.has(pet.id)}
+                  showSelector={showSelector}
+                  showActionsMenu={showActionsMenu}
+                  showBookmarker={showBookmarker}
+                  onEditPet={onEditPet}
+                  onRemovePet={onRemovePet}
+                  onSelectPet={onSelectPet}
+                  onUnselectPet={onUnselectPet}
+                  onFavoritePet={onFavoritePet}
+                  onUnfavoritePet={onUnfavoritePet}
+                />
+              );
+            } else {
+              return null;
+            }
+          })}
       </ul>
     </section>
   );

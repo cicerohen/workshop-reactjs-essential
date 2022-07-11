@@ -1,13 +1,12 @@
-import { createContext, useContext } from 'react';
-import { useFavoritePets } from '../hooks/useFavoritePets';
+import { createContext, useContext, useEffect, useState } from 'react';
 
-import { RCProps } from '../types';
+import { getFavoritePetsFromLocalStorage } from '../hooks/useFavoritePets';
+
+import { PetsMap, RCProps } from '../types';
 
 type FavoritePetsContext = {
-  favoriteCats: ReturnType<typeof useFavoritePets>['favoritePets'];
-  favoriteCat: ReturnType<typeof useFavoritePets>['favoritePet'];
-  unFavoriteCat: ReturnType<typeof useFavoritePets>['unFavoritePet'];
-  unFavoriteCats: ReturnType<typeof useFavoritePets>['unFavoritePets'];
+  favoriteCats: PetsMap;
+  setFavoriteCats: (pets: PetsMap) => void;
 };
 
 type Props = RCProps;
@@ -15,18 +14,12 @@ type Props = RCProps;
 const Context = createContext<FavoritePetsContext>({} as FavoritePetsContext);
 
 export const FavoriteCatsProvider = ({ children }: Props) => {
-  const {
-    favoritePets: favoriteCats,
-    favoritePet: favoriteCat,
-    unFavoritePet: unFavoriteCat,
-    unFavoritePets: unFavoriteCats
-  } = useFavoritePets('cat');
-
-  const value: FavoritePetsContext = {
+  const [favoriteCats, setFavoriteCats] = useState<PetsMap>(
+    getFavoritePetsFromLocalStorage('cats')
+  );
+  const value = {
     favoriteCats,
-    favoriteCat,
-    unFavoriteCat,
-    unFavoriteCats
+    setFavoriteCats
   };
 
   return <Context.Provider value={value}>{children}</Context.Provider>;

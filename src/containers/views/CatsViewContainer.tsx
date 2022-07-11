@@ -1,36 +1,40 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View } from '../../components/View';
 import { PetsList } from '../../components/PetsList';
 import { PetEditModal } from '../../components/PetEditModal';
 
 import { usePets } from '../../hooks/usePets';
 import { useSelectedPets } from '../../hooks/useSelectedPets';
+import { useFavoritePets } from '../../hooks/useFavoritePets';
 import { usePetEditForm } from '../../components/PetEditForm';
 
-import { useFavoriteCatsContext } from '../..//contexts/FavoriteCatsContext';
+import { useFavoriteCatsContext } from '../../contexts/FavoriteCatsContext';
 
 import { Pet } from '../../types';
 
 export const CatsViewContainer = () => {
-  const { pets, addPet, updatePet, removePet, removePets } = usePets('cat');
+  const { pets, addPet, updatePet, removePet, removePets } = usePets('cats');
 
   const {
-    selectedPetIds,
     areAllPetsSelected,
     areThereAnySelectedPets,
     areThereAnyPets,
     selectPet,
+    selectedPets,
     unselectPet,
     selectAllPets,
     unselectAllPets
-  } = useSelectedPets(pets, 'cat');
+  } = useSelectedPets(pets, 'cats');
 
-  const { favoriteCats, favoriteCat, unFavoriteCat } = useFavoriteCatsContext();
+  const { favoritePets, favoritePet, unFavoritePet } = useFavoritePets(
+    pets,
+    'cats'
+  );
 
-  const [modal, setModal] = useState<PetEditModal>({
-    loading: false,
-    open: false
-  });
+  const { setFavoriteCats: setFavoriteCatsToContext } =
+    useFavoriteCatsContext();
+
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   const editForm = usePetEditForm({
     onSubmit: (values, helpers) => {
@@ -38,7 +42,7 @@ export const CatsViewContainer = () => {
         return;
       }
 
-      setModal((prev) => ({ ...prev, loading: true }));
+      setModalOpen(true);
 
       if (values.id) {
         updatePet(values.id, {
@@ -52,37 +56,30 @@ export const CatsViewContainer = () => {
         });
       }
 
-      setModal({
-        loading: false,
-        open: false
-      });
+      setModalOpen(false);
 
       helpers.resetForm();
     }
   });
 
   const onAddPet = () => {
-    setModal({
-      open: true,
-      loading: false
-    });
+    setModalOpen(true);
   };
 
   const onEditPet = (pet: Pet) => {
-    setModal({
-      open: true,
-      loading: false
-    });
+    setModalOpen(true);
     editForm.setValues(pet);
   };
 
   const onRemovePet = (pet: Pet) => {
     removePet(pet.id);
-    unFavoriteCat(pet);
   };
 
   const onRemoveSelectedPets = () => {
-    removePets(Object.keys(selectedPetIds));
+    const ids = Array.from(selectedPets.values()).map(
+      (pet) => (pet && pet.id) || ''
+    );
+    removePets(ids);
   };
 
   const onSelectPet = (pet: Pet) => {
@@ -102,26 +99,27 @@ export const CatsViewContainer = () => {
   };
 
   const onFavoritePet = (pet: Pet) => {
-    favoriteCat(pet);
+    favoritePet(pet.id);
   };
   const onUnFavoritePet = (pet: Pet) => {
-    unFavoriteCat(pet);
+    unFavoritePet(pet.id);
   };
 
   const onClosePetEditModal = () => {
-    setModal({
-      open: false,
-      loading: false
-    });
+    setModalOpen(false);
     editForm.resetForm();
   };
+
+  useEffect(() => {
+    setFavoriteCatsToContext(favoritePets);
+  }, [favoritePets]);
 
   return (
     <View title="Add Cats">
       <PetsList
         pets={pets}
-        favoritePets={favoriteCats}
-        selectedPetIds={selectedPetIds}
+        selectedPets={selectedPets}
+        favoritePets={favoritePets}
         showSelector
         showBookmarker
         showActionsMenu
@@ -140,8 +138,7 @@ export const CatsViewContainer = () => {
         onUnfavoritePet={onUnFavoritePet}
       />
       <PetEditModal
-        open={modal.open}
-        loading={modal.loading}
+        open={modalOpen}
         onClose={onClosePetEditModal}
         formProps={editForm}
       />

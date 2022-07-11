@@ -1,91 +1,80 @@
 import { useEffect, useState } from 'react';
 
-import { Pet, Species } from '../types';
+import { Pet, Species, PetsMap } from '../types';
 
-type SelectedPetIds = Record<Pet['id'], Pet['id']>;
-
-const getSelectedPetsFromLocalStorage = (species: Species): SelectedPetIds => {
+const getSelectedPetsFromLocalStorage = (species: Species): PetsMap => {
   try {
-    return (
-      JSON.parse(
-        window.localStorage.getItem(`selected-${species}`) as string
-      ) || {}
+    return new Map(
+      JSON.parse(window.localStorage.getItem(`selected-${species}`) || '[]')
     );
   } catch (e) {
-    return {};
+    return new Map();
   }
 };
 
 const setSelectedPetsToLocalStorage = (
   species: Species,
-  selectedPets: SelectedPetIds
+  selectedPets: PetsMap
 ) => {
   window.localStorage.setItem(
     `selected-${species}`,
-    JSON.stringify(selectedPets)
+    JSON.stringify(Array.from(selectedPets.entries()))
   );
 };
 
-export const useSelectedPets = (pets: Pet[], species: Species) => {
-  const [selectedPetIds, setSelectedPetIds] = useState<SelectedPetIds>(
+export const useSelectedPets = (pets: PetsMap, species: Species) => {
+  const [selectedPets, setSelectedPets] = useState<PetsMap>(
     getSelectedPetsFromLocalStorage(species)
   );
 
   const selectPet = (id: Pet['id']) => {
-    setSelectedPetIds((prev) => ({
-      ...prev,
-      [id]: id
-    }));
+    setSelectedPets((prev) => {
+      const next = new Map(prev);
+      next.set(id, pets.get(id));
+      return next;
+    });
   };
 
   const unselectPet = (id: Pet['id']) => {
-    setSelectedPetIds((prev) =>
-      Object.keys(prev).reduce((acc, curr) => {
-        if (curr !== id) {
-          acc[curr] = curr;
-        }
-        return acc;
-      }, {} as SelectedPetIds)
-    );
+    setSelectedPets((prev) => {
+      const next = new Map(prev);
+      next.delete(id);
+      return next;
+    });
   };
 
   const selectAllPets = () => {
-    setSelectedPetIds(
-      pets.reduce((acc, curr) => {
-        acc[curr.id] = curr.id;
-        return acc;
-      }, {} as SelectedPetIds)
-    );
+    setSelectedPets(new Map(pets));
   };
 
   const unselectAllPets = () => {
-    setSelectedPetIds({});
+    setSelectedPets(new Map());
   };
 
   const areAllPetsSelected =
-    Object.keys(selectedPetIds).length > 0 &&
-    Object.keys(selectedPetIds).length === pets.length;
+    selectedPets.size > 0 && selectedPets.size === pets.size;
 
-  const areThereAnySelectedPets = Object.keys(selectedPetIds).length > 0;
-  const areThereAnyPets = pets.length > 0;
+  const areThereAnySelectedPets = selectedPets.size > 0;
+  const areThereAnyPets = pets.size > 0;
 
   useEffect(() => {
-    setSelectedPetIds(
-      pets.reduce((acc, curr) => {
-        if (selectedPetIds[curr.id]) {
-          acc[curr.id] = curr.id;
+    setSelectedPets((prev) => {
+      const next = new Map(prev);
+      next.forEach((p) => {
+        if (p && !pets.has(p.id)) {
+          next.delete(p.id);
         }
-        return acc;
-      }, {} as SelectedPetIds)
-    );
+      });
+      return next;
+    });
   }, [pets]);
 
   useEffect(() => {
-    setSelectedPetsToLocalStorage(species, selectedPetIds);
-  }, [selectedPetIds]);
+    setSelectedPetsToLocalStorage(species, selectedPets);
+  }, [selectedPets]);
 
   return {
-    selectedPetIds,
+    selectedPets,
     areAllPetsSelected,
     areThereAnySelectedPets,
     areThereAnyPets,

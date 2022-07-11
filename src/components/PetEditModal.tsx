@@ -4,14 +4,8 @@ import { PetEditForm, PetEditFormProps } from './PetEditForm';
 
 import { RCProps } from '../types';
 
-export type PetEditModal = {
-  open: boolean;
-  loading: boolean;
-};
-
 type Props = RCProps<{
   open: boolean;
-  loading: boolean;
   onClose: () => void;
   formProps: PetEditFormProps;
 }>;

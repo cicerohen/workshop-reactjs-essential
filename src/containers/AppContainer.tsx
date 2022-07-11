@@ -1,12 +1,12 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-import { FavoriteCatsProvider } from '../contexts/FavoriteCatsContext';
-import { FavoriteDogsProvider } from '../contexts/FavoriteDogsContext';
-
 import { HomeViewContainer } from './views/HomeViewContainer';
 import { CatsViewContainer } from './views/CatsViewContainer';
 import { DogsViewContainer } from './views/DogsViewContainer';
 import { FavoritePetsViewContainer } from './views/FavoritePetsViewContainer';
+
+import { FavoriteCatsProvider } from '../contexts/FavoriteCatsContext';
+import { FavoriteDogsProvider } from '../contexts/FavoriteDogsContext';
 
 export const AppContainer = () => {
   return (
